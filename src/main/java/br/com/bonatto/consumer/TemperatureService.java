@@ -7,22 +7,20 @@ import com.influxdb.client.WriteApi;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+
 
 import java.time.Instant;
 import java.util.Map;
 
 public class TemperatureService {
 
-    private static Logger logger = LogManager.getLogger(TemperatureService.class);
 
     public static void main(String[] args) {
 
         // You can generate an API token from the "API Tokens Tab" in the UI
-        String token = "ZeYEyj14Dx8hPFKJfmP1o8qacoxIQcr3eKyBhIG435WaBae8NI1Y4WcEwPahZyTMnY3r3O1hx4U0yw997Lpa6w==";
-        String bucket = "bonatto bucket";
-        String org = "bonatto";
+        String token = "vZX0TP_Th17nFbJJdcieHF8uC1mjA3vyQwSIMqYPHIJ647VNu37ZL3OXUgC-iZvoPcKCTGN0cfKeteUlRWk_BA==";
+        String bucket = "Bonatto";
+        String org = "Bonatto";
 
         InfluxDBClient client = InfluxDBClientFactory.create("http://localhost:8086", token.toCharArray());
 
@@ -38,10 +36,8 @@ public class TemperatureService {
 
     private void parse(ConsumerRecord<String, Double> record, InfluxDBClient client, String bucket, String org) {
 
-//        logger.debug("Temperature: "+record.value());
-//        System.out.println("------------------------------------------");
+
         System.out.println("Consume Temperature");
-//        System.out.println(record.value());
 
         Point point = Point
                 .measurement("temperature")
