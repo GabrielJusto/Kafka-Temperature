@@ -1,6 +1,6 @@
 package br.com.bonatto.dto;
 
-import br.com.bonatto.geo.Point;
+import br.com.bonatto.modelo.Point;
 
 public class ClientDto
 {

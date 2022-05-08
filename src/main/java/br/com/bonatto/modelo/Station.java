@@ -1,7 +1,5 @@
 package br.com.bonatto.modelo;
 
-import br.com.bonatto.geo.Point;
-
 import javax.persistence.*;
 
 @Entity

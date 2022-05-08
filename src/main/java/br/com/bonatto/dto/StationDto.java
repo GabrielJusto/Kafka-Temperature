@@ -1,7 +1,8 @@
 package br.com.bonatto.dto;
 
 
-import br.com.bonatto.geo.Point;
+import br.com.bonatto.modelo.Point;
+import br.com.bonatto.modelo.Station;
 
 public class StationDto
 {
@@ -15,6 +16,14 @@ public class StationDto
         this.connector = connector;
         this.fastCharge = fastCharge;
         this.brand = brand;
+    }
+
+    public StationDto(Station station)
+    {
+        this.local = station.getLocal();
+        this.connector = station.getConnector();
+        this.fastCharge = station.isFastCharge();
+        this.brand = station.getBrand();
     }
 
 }

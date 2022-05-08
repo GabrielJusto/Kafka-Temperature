@@ -1,16 +1,19 @@
 package br.com.bonatto.form;
 
-import br.com.bonatto.geo.Point;
+import br.com.bonatto.modelo.Point;
 import br.com.bonatto.modelo.Station;
 
-import javax.persistence.OneToOne;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class StationForm
 {
     @NotNull @NotEmpty
-    private Point local;
+    private double lat;
+
+    @NotNull @NotEmpty
+    private double lon;
+
     @NotNull @NotEmpty
     private String connector;
     private boolean fastCharge;
@@ -18,12 +21,9 @@ public class StationForm
 
     public Station convert()
     {
-        return new Station(local, connector, fastCharge, brand);
+        return new Station(new Point(lat, lon), connector, fastCharge, brand);
     }
 
-    public Point getLocal() {
-        return local;
-    }
 
     public String getConnector() {
         return connector;
@@ -35,5 +35,13 @@ public class StationForm
 
     public String getBrand() {
         return brand;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
     }
 }
