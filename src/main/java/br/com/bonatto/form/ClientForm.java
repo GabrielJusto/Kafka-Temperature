@@ -16,4 +16,24 @@ public class ClientForm
     {
         return new Client(new Point(lat, lon), connector, maxPrice, walletKey);
     }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public String getConnector() {
+        return connector;
+    }
+
+    public double getMaxPrice() {
+        return maxPrice;
+    }
+
+    public String getWalletKey() {
+        return walletKey;
+    }
 }
