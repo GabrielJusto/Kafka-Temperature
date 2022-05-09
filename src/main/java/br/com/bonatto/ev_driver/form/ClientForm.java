@@ -1,7 +1,7 @@
-package br.com.bonatto.form;
+package br.com.bonatto.ev_driver.form;
 
-import br.com.bonatto.modelo.Client;
-import br.com.bonatto.modelo.Point;
+import br.com.bonatto.ev_driver.model.Client;
+import br.com.bonatto.broker.model.Point;
 
 public class ClientForm
 {

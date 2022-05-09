@@ -1,11 +1,10 @@
-package br.com.bonatto.controller;
+package br.com.bonatto.ev_driver.controller;
 
-import br.com.bonatto.form.ClientForm;
-import br.com.bonatto.form.StationForm;
-import br.com.bonatto.modelo.Client;
-import br.com.bonatto.modelo.Station;
-import br.com.bonatto.repository.ClientRepository;
-import br.com.bonatto.repository.PointRepository;
+import br.com.bonatto.ev_driver.form.ClientForm;
+import br.com.bonatto.ev_driver.model.Client;
+import br.com.bonatto.broker.repository.ClientRepository;
+import br.com.bonatto.broker.repository.PointRepository;
+import br.com.bonatto.ev_driver.producer.ClientRegister;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,10 +16,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/clients")
 public class ClientController
 {
-
-    @Autowired
-    private ClientRepository clientRepository;
-
     @Autowired
     private PointRepository pointRepository;
 
@@ -28,16 +23,11 @@ public class ClientController
     public void newClient(@RequestBody ClientForm form, UriComponentsBuilder uriBuilder)
     {
         Client client = form.convert();
-        System.out.println(form.getLat());
         pointRepository.save(client.getLocal());
-        System.out.println(client.getLocal().getLat());
-        System.out.println(client.getLocal().getId());
 
-        clientRepository.save(client);
+        ClientRegister clientRegister = new ClientRegister(form);
+        clientRegister.sendRegister();
 
-
-//        URI uri = uriBuilder.path("/gagaga/{id}").buildAndExpand(station.getId()).toUri();
-//        return ResponseEntity.created(uri).body(new StationDto(station));
 
     }
 

@@ -1,6 +1,6 @@
-package br.com.bonatto.form;
+package br.com.bonatto.broker.form;
 
-import br.com.bonatto.modelo.Point;
+import br.com.bonatto.broker.model.Point;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

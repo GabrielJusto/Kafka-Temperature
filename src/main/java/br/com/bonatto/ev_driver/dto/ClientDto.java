@@ -1,6 +1,7 @@
-package br.com.bonatto.dto;
+package br.com.bonatto.ev_driver.dto;
 
-import br.com.bonatto.modelo.Point;
+import br.com.bonatto.broker.dto.PointDto;
+import br.com.bonatto.broker.model.Point;
 
 public class ClientDto
 {

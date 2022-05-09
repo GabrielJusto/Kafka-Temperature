@@ -1,8 +1,9 @@
-package br.com.bonatto.dto;
+package br.com.bonatto.station.dto;
 
 
-import br.com.bonatto.modelo.Point;
-import br.com.bonatto.modelo.Station;
+import br.com.bonatto.broker.dto.PointDto;
+import br.com.bonatto.broker.model.Point;
+import br.com.bonatto.station.model.Station;
 
 public class StationDto
 {

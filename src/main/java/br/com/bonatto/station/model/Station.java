@@ -1,4 +1,6 @@
-package br.com.bonatto.modelo;
+package br.com.bonatto.station.model;
+
+import br.com.bonatto.broker.model.Point;
 
 import javax.persistence.*;
 

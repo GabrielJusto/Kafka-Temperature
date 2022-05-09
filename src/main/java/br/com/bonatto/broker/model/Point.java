@@ -1,4 +1,4 @@
-package br.com.bonatto.modelo;
+package br.com.bonatto.broker.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

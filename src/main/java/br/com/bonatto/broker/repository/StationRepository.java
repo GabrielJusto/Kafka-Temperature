@@ -1,7 +1,6 @@
-package br.com.bonatto.repository;
+package br.com.bonatto.broker.repository;
 
-import br.com.bonatto.dto.StationDto;
-import br.com.bonatto.modelo.Station;
+import br.com.bonatto.station.model.Station;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StationRepository extends JpaRepository<Station, Long>
