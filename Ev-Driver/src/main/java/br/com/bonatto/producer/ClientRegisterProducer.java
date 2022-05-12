@@ -1,23 +1,24 @@
-package br.com.bonatto.ev_driver.producer;
+package br.com.bonatto.producer;
 
 import br.com.bonatto.ev_driver.form.ClientForm;
 import br.com.bonatto.kafka.KafkaDispatcher;
+import br.com.bonatto.model.Client;
 
 import java.util.concurrent.ExecutionException;
 
-public class ClientRegister
+public class ClientRegisterProducer
 {
 
-    private ClientForm client;
+    private Client client;
 
-    public ClientRegister(ClientForm client) {
+    public ClientRegisterProducer(Client client) {
         this.client = client;
     }
 
     public void sendRegister()
     {
 
-        try(var clientDispatcher = new KafkaDispatcher<ClientForm>()) {
+        try(var clientDispatcher = new KafkaDispatcher<Client>()) {
 
 
             clientDispatcher.send("CLIENT-REGISTER", client.toString(), client);
@@ -29,5 +30,4 @@ public class ClientRegister
             throw new RuntimeException(e);
         }
     }
-
 }

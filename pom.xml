@@ -6,7 +6,14 @@
 
     <groupId>org.example</groupId>
     <artifactId>Temperature</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>Ev-Driver</module>
+        <module>Broker</module>
+        <module>Kafka</module>
+        <module>Station</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -136,6 +143,12 @@
             <version>2.6.6</version>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>Kafka</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
 

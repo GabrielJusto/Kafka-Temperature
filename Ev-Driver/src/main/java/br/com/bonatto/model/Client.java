@@ -1,4 +1,4 @@
-package br.com.bonatto.ev_driver.model;
+package br.com.bonatto.model;
 
 import br.com.bonatto.broker.model.Point;
 

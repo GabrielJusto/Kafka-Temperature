@@ -6,8 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="Kafka" />
+        <module name="Station" />
         <module name="Temperature" />
-        <module name="Kafka-Temperature" />
+        <module name="Ev-Driver" />
+        <module name="Broker" />
       </profile>
     </annotationProcessing>
   </component>

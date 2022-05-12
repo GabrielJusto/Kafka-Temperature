@@ -1,9 +1,8 @@
 package br.com.bonatto.ev_driver.controller;
 
 import br.com.bonatto.ev_driver.form.ClientForm;
-import br.com.bonatto.ev_driver.model.Client;
-import br.com.bonatto.broker.repository.ClientRepository;
 import br.com.bonatto.broker.repository.PointRepository;
+import br.com.bonatto.ev_driver.model.Client;
 import br.com.bonatto.ev_driver.producer.ClientRegister;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
