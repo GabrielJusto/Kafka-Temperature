@@ -1,6 +1,5 @@
 package br.com.bonatto.producer;
 
-import br.com.bonatto.ev_driver.form.ClientForm;
 import br.com.bonatto.kafka.KafkaDispatcher;
 import br.com.bonatto.model.Client;
 

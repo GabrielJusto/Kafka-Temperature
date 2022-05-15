@@ -13,6 +13,7 @@
         <module>Broker</module>
         <module>Kafka</module>
         <module>Station</module>
+        <module>common-types</module>
     </modules>
 
     <properties>

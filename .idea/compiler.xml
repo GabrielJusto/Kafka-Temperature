@@ -11,6 +11,7 @@
         <module name="Temperature" />
         <module name="Ev-Driver" />
         <module name="Broker" />
+        <module name="common-types" />
       </profile>
     </annotationProcessing>
   </component>
