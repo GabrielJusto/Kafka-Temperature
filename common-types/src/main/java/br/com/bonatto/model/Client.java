@@ -1,9 +1,12 @@
 package br.com.bonatto.model;
 
+
+
 public class Client
 {
 
     private long id;
+
     private Point local;
     private String connector;
     private double maxPrice;

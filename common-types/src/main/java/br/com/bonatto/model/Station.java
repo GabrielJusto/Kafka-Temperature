@@ -1,14 +1,10 @@
 package br.com.bonatto.model;
 
-import javax.persistence.*;
 
-@Entity
 public class Station
 {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private int id;
 
-    @OneToOne
     private Point local;
     private String connector;
     private boolean fastCharge;
@@ -17,7 +13,8 @@ public class Station
     public Station() {
     }
 
-    public Station(Point local, String connector, boolean fastCharge, String brand) {
+    public Station(int id, Point local, String connector, boolean fastCharge, String brand) {
+        this.id = id;
         this.local = local;
         this.connector = connector;
         this.fastCharge = fastCharge;
@@ -28,9 +25,7 @@ public class Station
         return local;
     }
 
-    public long getId() {
-        return id;
-    }
+
 
     public String getConnector() {
         return connector;
@@ -42,5 +37,9 @@ public class Station
 
     public String getBrand() {
         return brand;
+    }
+
+    public int getId() {
+        return id;
     }
 }

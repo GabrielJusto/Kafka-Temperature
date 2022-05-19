@@ -1,6 +1,5 @@
 package br.com.bonatto;
 
-import br.com.bonatto.form.ClientForm;
 import br.com.bonatto.kafka.KafkaDispatcher;
 import br.com.bonatto.model.Client;
 import br.com.bonatto.model.Point;
@@ -11,10 +10,10 @@ public class ClientApplication
 {
     public static void main(String[] args) {
 
-        try(KafkaDispatcher<ClientForm> clientDispatcher = new KafkaDispatcher<>())
+        try(KafkaDispatcher<Client> clientDispatcher = new KafkaDispatcher<>())
         {
             clientDispatcher.send("CLIENT-REGISTER", "Client",
-                    new ClientForm(10,10 , "CON", 200, "WALLET"));
+                    new Client(new Point(10,10) , "CON2", 50, "WALLET123"));
 
 
 

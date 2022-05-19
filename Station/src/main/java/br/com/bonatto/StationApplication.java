@@ -1,19 +1,38 @@
 package br.com.bonatto;
 
-import br.com.bonatto.form.StationForm;
 import br.com.bonatto.kafka.KafkaDispatcher;
+import br.com.bonatto.model.Point;
 import br.com.bonatto.model.Station;
+import br.com.bonatto.model.StationInfo;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StationApplication
 {
     public static void main(String[] args) {
 
-        try(KafkaDispatcher<StationForm> clientDispatcher = new KafkaDispatcher<>())
+        try(KafkaDispatcher<Station> clientDispatcher = new KafkaDispatcher<>())
         {
-            clientDispatcher.send("STATION-REGISTER", "Client",
-                    new StationForm(10,10, "CON", true, "B1"));
+            int uniqueID = (int) (System.currentTimeMillis()%999999);
+
+            clientDispatcher.send("STATION-REGISTER", Station.class.getSimpleName(),
+                    new Station(uniqueID, new Point(20,10), "CON2", false, "B2"));
+
+            StationInfo info = new StationInfo(uniqueID, false, 100, 0, 100000, 20);
+
+            try(KafkaDispatcher<StationInfo> infoDispatcher = new KafkaDispatcher<>())
+            {
+                int i=1;
+                while(true)
+                {
+                    info.setPrice(i++ * 3);
+                    infoDispatcher.send("STATION-INFO", StationInfo.class.getSimpleName(), info);
+                    Thread.sleep(5000);
+
+                }
+            }
 
 
 

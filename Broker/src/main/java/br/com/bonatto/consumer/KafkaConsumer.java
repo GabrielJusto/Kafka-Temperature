@@ -1,8 +1,12 @@
 package br.com.bonatto.consumer;
 
-import br.com.bonatto.form.ClientForm;
-import br.com.bonatto.form.StationForm;
 import br.com.bonatto.kafka.KafkaService;
+import br.com.bonatto.model.Client;
+import br.com.bonatto.model.Station;
+import br.com.bonatto.model.StationInfo;
+import br.com.bonatto.repository.client.ClientRepository;
+import br.com.bonatto.repository.factory.ConnectionFactory;
+import br.com.bonatto.repository.station.StationRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.influxdb.client.InfluxDBClient;
@@ -10,13 +14,18 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class KafkaConsumer
 {
 
-    public static void main(String[] args) {
+
+
+    public void consume() {
 
 
        KafkaConsumer consumer = new KafkaConsumer();
@@ -36,21 +45,37 @@ public class KafkaConsumer
         try {
             Gson gson = new GsonBuilder().create();
             String className;
+            ConnectionFactory factory = new ConnectionFactory();
+            Connection con = factory.recuperarConexao();
+            con.setAutoCommit(false);
+
+            StationRepository stationRepository = new StationRepository(con);
 
             switch (record.topic()) {
                 case "CLIENT-REGISTER":
-                    className = ClientForm.class.getName();
-                    ClientForm clientForm = gson.fromJson(record.value(), (Class<ClientForm>) Class.forName(className));
-                    System.out.println(clientForm.getConnector());
+                    ClientRepository clientRepository = new ClientRepository(con);
+                    className = Client.class.getName();
+                    Client c = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
+                    clientRepository.insert(c);
+                    con.commit();
                     break;
                 case "STATION-REGISTER":
-                    className = StationForm.class.getName();
-                    StationForm stationForm = gson.fromJson(record.value(), (Class<StationForm>) Class.forName(className));
-                    System.out.println(stationForm.getConnector());
+                    className = Station.class.getName();
+                    Station station = gson.fromJson(record.value(), (Class<Station>) Class.forName(className));
+                    stationRepository.insert(station);
+                    con.commit();
                     break;
+                case "STATION-INFO":
+                    className = StationInfo.class.getName();
+                    StationInfo stationInfo = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
+                    stationRepository.update(stationInfo);
+                    con.commit();
+
             }
 
         } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
