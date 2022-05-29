@@ -21,9 +21,9 @@ public class KafkaService<T> implements Closeable {
     private String org;
 
 
-    public KafkaService(String groupId, String topic, ConsumerFunction parse, Class<T> type, Map<String, String> properties,InfluxDBClient client, String bucket, String org) {
+    public KafkaService(String groupId, Pattern topic, ConsumerFunction parse, Class<T> type, Map<String, String> properties,InfluxDBClient client, String bucket, String org) {
         this(parse, groupId, type, properties, client, bucket, org);
-        consumer.subscribe(Collections.singletonList(topic));
+        consumer.subscribe(topic);
     }
     public KafkaService(String groupId, String topic, ConsumerFunction parse, Class<T> type, Map<String, String> properties) {
         this(parse, groupId, type, properties);

@@ -12,6 +12,28 @@ public class PointRepository
         this.con = con;
     }
 
+
+    public Point select(double lat, double lon)
+    {
+        String sql = "SELECT pointId, lat, lon FROM point WHERE lat = ? AND lon = ?";
+
+        try(PreparedStatement pstmt = con.prepareStatement(sql))
+        {
+            int i = 1;
+            pstmt.setDouble(i++, lat);
+            pstmt.setDouble(i++, lat);
+
+            try(ResultSet rs = pstmt.executeQuery())
+            {
+                if(rs.next())
+                    return new Point(rs.getInt("pointId"), rs.getDouble("lat"), rs.getDouble("lon"));
+                return null;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public int insert(Point point)
     {
         String sql = "INSERT INTO point (lat, lon) VALUES (?,?)";

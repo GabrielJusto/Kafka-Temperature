@@ -1,5 +1,6 @@
 package br.com.bonatto.repository.station;
 
+import br.com.bonatto.model.Point;
 import br.com.bonatto.model.Station;
 import br.com.bonatto.model.StationInfo;
 import br.com.bonatto.repository.Point.PointRepository;
@@ -42,7 +43,12 @@ public class StationRepository
     {
 
         PointRepository pointRepository = new PointRepository(con);
-        int pointId = pointRepository.insert(station.getLocal());
+        Point p = pointRepository.select(station.getLocal().getLat(), station.getLocal().getLon());
+        int pointId;
+        if(p == null)
+            pointId = pointRepository.insert(station.getLocal());
+        else
+            pointId = p.getId();
 
         String sql = "INSERT INTO station(stationId, pointId, connector, fastCharge, brand) VALUES (?,?,?,?,?)";
 

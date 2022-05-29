@@ -4,7 +4,7 @@ package br.com.bonatto.model;
 public class Point
 {
 
-    private long id;
+    private int id;
     private double lon;
     private double lat;
 
@@ -14,8 +14,13 @@ public class Point
         this.lat = lat;
     }
 
+    public Point(int id, double lon, double lat) {
+        this.id = id;
+        this.lon = lon;
+        this.lat = lat;
+    }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

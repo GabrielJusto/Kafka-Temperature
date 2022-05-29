@@ -5,6 +5,7 @@ import br.com.bonatto.model.Point;
 import br.com.bonatto.model.Station;
 import br.com.bonatto.model.StationInfo;
 
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +28,10 @@ public class StationApplication
                 int i=1;
                 while(true)
                 {
-                    info.setPrice(i++ * 3);
+                    Random r = new Random();
+                    double price = r.nextDouble() * 500;
+                    info.setPrice(price);
+                    info.setBusy(r.nextBoolean());
                     infoDispatcher.send("STATION-INFO", StationInfo.class.getSimpleName(), info);
                     Thread.sleep(5000);
 

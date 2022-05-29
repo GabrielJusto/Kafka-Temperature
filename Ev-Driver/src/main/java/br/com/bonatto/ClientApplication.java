@@ -12,10 +12,15 @@ public class ClientApplication
 
         try(KafkaDispatcher<Client> clientDispatcher = new KafkaDispatcher<>())
         {
-            clientDispatcher.send("CLIENT-REGISTER", "Client",
-                    new Client(new Point(10,10) , "CON2", 50, "WALLET123"));
+            int uniqueID = (int) (System.currentTimeMillis()%999999);
+            Client client = new Client(uniqueID, new Point(10,10) , "CON2", 50, "WALLET123");
+            clientDispatcher.send("CLIENT-REGISTER", Client.class.getSimpleName(), client);
 
 
+            while(true)
+            {
+                clientDispatcher.send("CLIENT-INFO", Client.class.getSimpleName(), client);
+            }
 
         }catch (ExecutionException | InterruptedException e) {
             System.err.println("Error to send register client message: " + e.getMessage());
