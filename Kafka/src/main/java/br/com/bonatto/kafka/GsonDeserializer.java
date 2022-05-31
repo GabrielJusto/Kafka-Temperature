@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class GsonDeserializer<T> implements Deserializer<T> {
 
-    public static final String TYPE_CONFIG = "br.com.alura.ecommerce.type_config";
+    public static final String TYPE_CONFIG = "br.com.bonatto.model";
 
     private final Gson gson = new GsonBuilder().create();
     private Class<T> type;

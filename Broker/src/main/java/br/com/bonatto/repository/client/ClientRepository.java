@@ -33,7 +33,7 @@ public class ClientRepository {
     {
         int pointId = getPoitId(client);
 
-        String sql = "UPDATE client SET poitId = ?, connector = ?, maxPrice = ?, walletKey = ? WHERE clientId = ? ";
+        String sql = "UPDATE client SET pointId = ?, connector = ?, maxPrice = ?, walletKey = ? WHERE clientId = ? ";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql))
         {
@@ -57,11 +57,12 @@ public class ClientRepository {
 
         int pointId = getPoitId(client);
 
-        String sql = "INSERT INTO client ( pointId, connector, maxPrice, walletKey) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO client ( clientId, pointId, connector, maxPrice, walletKey) VALUES (?,?,?,?,?)";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql))
         {
             int i=1;
+            pstmt.setInt(i++, client.getId());
             pstmt.setInt(i++, pointId);
             pstmt.setString(i++, client.getConnector());
             pstmt.setDouble(i++, client.getMaxPrice());

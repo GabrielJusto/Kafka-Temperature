@@ -20,6 +20,7 @@ public class ClientApplication
             while(true)
             {
                 clientDispatcher.send("CLIENT-INFO", Client.class.getSimpleName(), client);
+                Thread.sleep(5000);
             }
 
         }catch (ExecutionException | InterruptedException e) {

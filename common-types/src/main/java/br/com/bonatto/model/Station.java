@@ -3,7 +3,7 @@ package br.com.bonatto.model;
 
 public class Station
 {
-    private int id;
+    private long id;
 
     private Point local;
     private String connector;
@@ -13,7 +13,7 @@ public class Station
     public Station() {
     }
 
-    public Station(int id, Point local, String connector, boolean fastCharge, String brand) {
+    public Station(long id, Point local, String connector, boolean fastCharge, String brand) {
         this.id = id;
         this.local = local;
         this.connector = connector;
@@ -39,7 +39,7 @@ public class Station
         return brand;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 }

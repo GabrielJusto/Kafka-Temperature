@@ -1,5 +1,6 @@
 package br.com.bonatto.consumer;
 
+import br.com.bonatto.kafka.KafkaDispatcher;
 import br.com.bonatto.kafka.KafkaService;
 import br.com.bonatto.model.Client;
 import br.com.bonatto.model.Station;
@@ -23,11 +24,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class KafkaConsumer
 {
-
 
 
     public void consume() {
@@ -69,7 +70,7 @@ public class KafkaConsumer
 
             switch (record.topic()) {
                 case "CLIENT-REGISTER":
-
+                    System.out.println("recebi");
                     className = Client.class.getName();
                     Client c = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
                     clientRepository.insert(c);
@@ -83,10 +84,10 @@ public class KafkaConsumer
                     con.commit();
                     break;
                 case "STATION-REGISTER":
-                    className = Station.class.getName();
-                    Station station = gson.fromJson(record.value(), (Class<Station>) Class.forName(className));
-                    stationRepository.insert(station);
-                    con.commit();
+                   sendStationInfoRequest(gson, record, stationRepository, con);
+                    break;
+                case "STATION-REGISTER-REQUEST":
+                    senStationId();
                     break;
                 case "STATION-INFO":
                     className = StationInfo.class.getName();
@@ -116,6 +117,30 @@ public class KafkaConsumer
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void senStationId() {
+        try(KafkaDispatcher<Long> stationIdDispatcher = new KafkaDispatcher<>()) {
+            stationIdDispatcher.send("STATION-REGISTER-RESPONSE", Station.class.getSimpleName(), System.currentTimeMillis());
+
+        } catch (ExecutionException | InterruptedException | RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private void sendStationInfoRequest(Gson gson, ConsumerRecord<String, String> record, StationRepository stationRepository, Connection con)
+    {
+        try(KafkaDispatcher<Station> infoRequestDispatcher = new KafkaDispatcher<>()) {
+
+            String className = Station.class.getName();
+            Station station = gson.fromJson(record.value(), (Class<Station>) Class.forName(className));
+            stationRepository.insert(station);
+            con.commit();
+
+        } catch ( SQLException | RuntimeException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

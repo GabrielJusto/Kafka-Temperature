@@ -8,8 +8,8 @@
     <persistence-unit name="BrokerDB">
         <properties>
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/Stations" />
-            <property name="javax.persistence.jdbc.user" value="gabriel" />
-            <property name="javax.persistence.jdbc.password" value="mastersql" />
+            <property name="javax.persistence.jdbc.user" value="master" />
+            <property name="javax.persistence.jdbc.password" value="password" />
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />

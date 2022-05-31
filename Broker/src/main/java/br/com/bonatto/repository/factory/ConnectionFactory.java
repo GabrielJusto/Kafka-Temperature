@@ -15,8 +15,8 @@ public class ConnectionFactory {
     {
         ComboPooledDataSource comboPoolDatasource = new ComboPooledDataSource();
         comboPoolDatasource.setJdbcUrl("jdbc:mysql://localhost:3306/Stations");
-        comboPoolDatasource.setUser("gabriel");
-        comboPoolDatasource.setPassword("mastersql");
+        comboPoolDatasource.setUser("master");
+        comboPoolDatasource.setPassword("password");
 
         comboPoolDatasource.setMaxPoolSize(10);
 
