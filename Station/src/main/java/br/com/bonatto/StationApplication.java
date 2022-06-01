@@ -70,7 +70,7 @@ public class StationApplication
     {
         try(KafkaDispatcher<StationInfo> stationDispatcher = new KafkaDispatcher<>())
         {
-            stationDispatcher.send("STATION-REGISTER", Station.class.getSimpleName(), info);
+            stationDispatcher.send("STATION-REGISTER", StationInfo.class.getSimpleName(), info);
         }
         catch (ExecutionException e) {
             throw new RuntimeException(e);

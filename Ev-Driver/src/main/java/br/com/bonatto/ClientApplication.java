@@ -13,7 +13,7 @@ public class ClientApplication
         try(KafkaDispatcher<Client> clientDispatcher = new KafkaDispatcher<>())
         {
             int uniqueID = (int) (System.currentTimeMillis()%999999);
-            Client client = new Client(uniqueID, new Point(10,10) , "CON2", 50, "WALLET123");
+            Client client = new Client(uniqueID, new Point(10,10) , "CON2", 50, "WALLET123", 200000, false);
             clientDispatcher.send("CLIENT-REGISTER", Client.class.getSimpleName(), client);
 
 

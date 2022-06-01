@@ -74,7 +74,6 @@ public class KafkaConsumer
                     Client c = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
                     clientRepository.insert(c);
                     con.commit();
-                    scheduleCharge(con, c);
                     break;
 
                 case "CLIENT-INFO" :
@@ -82,6 +81,8 @@ public class KafkaConsumer
                     Client clientInfo = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
                     clientRepository.update(clientInfo);
                     con.commit();
+
+                    scheduleCharge(con, clientInfo);
                     break;
                 case "STATION-REGISTER":
                     sendStationInfoRequest(gson, record, stationRepository, con);
@@ -90,7 +91,6 @@ public class KafkaConsumer
                     senStationId();
                     break;
                 case "STATION-INFO":
-                    System.out.println("recebi INFO");
                     className = StationInfo.class.getName();
                     StationInfo stationInfo = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
                     stationRepository.update(stationInfo);
@@ -126,19 +126,49 @@ public class KafkaConsumer
 
 
     private void scheduleCharge(Connection con, Client c) throws SQLException {
+
+
+
+        //Inicializa os repositorios para alterar o status da estacao e do cliente se for encontrada uma estacao
         StationRepository stationRepository = new StationRepository(con);
+        ClientRepository clientRepository = new ClientRepository(con);
+
+        //Verivica se o cliente ja esta carregando
+        Client c1 = clientRepository.getById(c.getId());
+        if(c1.isCharging())
+            return;
+
         ArrayList<StationInfo> stationsList = stationRepository.search();
 
         br.com.bonatto.model.Point cLocal = c.getLocal();
-        StationInfo closestStation = stationsList.get(0);
-        for(StationInfo s : stationsList)
-            if(br.com.bonatto.model.Point.distance(s.getLocal(), cLocal) < br.com.bonatto.model.Point.distance(closestStation.getLocal(), cLocal)
-                && !s.isBusy())
+        StationInfo closestStation = null;
+
+        for(int i=0; i<stationsList.size(); i++) {
+            StationInfo s = stationsList.get(i);
+            //Encontra a primeira estacao compativel
+            if (!s.isBusy() && s.getConnector().equals(c1.getConnector())){
                 closestStation = s;
 
+                //Procura se exite uma estacao compativel mais proxima
+                for(int j=i; j<stationsList.size(); i++){
+                    s = stationsList.get(j);
+                    if(!s.isBusy() && s.getConnector().equals(c1.getConnector())
+                    && br.com.bonatto.model.Point.distance(s.getLocal(), c1.getLocal()) < br.com.bonatto.model.Point.distance(closestStation.getLocal(), c.getLocal()))
+                        closestStation = s;
+                    i++;
+                }
 
-        closestStation.setBusy(true);
-        stationRepository.update(closestStation);
+            }
+        }
+
+        if(closestStation != null) {
+            closestStation.setBusy(true);
+            stationRepository.update(closestStation);
+
+            c1.setCharging(true);
+            clientRepository.update(c1);
+
+        }
 
         con.commit();
     }

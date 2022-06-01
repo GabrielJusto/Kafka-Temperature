@@ -4,7 +4,11 @@ CREATE TABLE client
     pointId INTEGER,
     connector VARCHAR(255),
     maxprice FLOAT,
-    walletKey VARCHAR(255));
+    walletKey VARCHAR(255),
+    timeToCharge BIGINT,
+    charging BIT
+);
+
 
 CREATE TABLE point
 (
