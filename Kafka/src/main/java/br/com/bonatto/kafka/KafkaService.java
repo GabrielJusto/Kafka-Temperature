@@ -1,5 +1,6 @@
 package br.com.bonatto.kafka;
 
+
 import com.influxdb.client.InfluxDBClient;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;

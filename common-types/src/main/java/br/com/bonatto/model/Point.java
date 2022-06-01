@@ -20,6 +20,11 @@ public class Point
         this.lat = lat;
     }
 
+    public static double distance(Point p1, Point p2)
+    {
+        return Math.sqrt((Math.pow(p1.lat,2) - Math.pow(p2.lat,2)) + (Math.pow(p1.lon,2) - Math.pow(p2.lon,2)));
+    }
+
     public int getId() {
         return id;
     }

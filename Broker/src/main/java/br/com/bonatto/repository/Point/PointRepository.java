@@ -34,6 +34,26 @@ public class PointRepository
             throw new RuntimeException(e);
         }
     }
+
+    public Point select(int pointId)
+{
+    String sql = "SELECT pointId, lat, lon FROM point WHERE pointId = ?";
+
+    try(PreparedStatement pstmt = con.prepareStatement(sql))
+    {
+       pstmt.setInt(1, pointId);
+
+        try(ResultSet rs = pstmt.executeQuery())
+        {
+            if(rs.next())
+                return new Point(rs.getInt("pointId"), rs.getDouble("lat"), rs.getDouble("lon"));
+            return null;
+        }
+
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+}
     public int insert(Point point)
     {
         String sql = "INSERT INTO point (lat, lon) VALUES (?,?)";

@@ -19,5 +19,10 @@ CREATE TABLE station
     pointId INTEGER,
     connector VARCHAR(255),
     fastCharge BIT,
-    brand VARCHAR(255)
+    brand VARCHAR(255),
+    busy BIT,
+    price FLOAT,
+    busyTime BIGINT,
+    timeToCharge BIGINT,
+    temperature FLOAT
 );

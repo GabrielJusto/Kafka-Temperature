@@ -17,11 +17,11 @@ public class ClientApplication
             clientDispatcher.send("CLIENT-REGISTER", Client.class.getSimpleName(), client);
 
 
-            while(true)
-            {
-                clientDispatcher.send("CLIENT-INFO", Client.class.getSimpleName(), client);
-                Thread.sleep(5000);
-            }
+//            while(true)
+//            {
+//                clientDispatcher.send("CLIENT-INFO", Client.class.getSimpleName(), client);
+//                Thread.sleep(5000);
+//            }
 
         }catch (ExecutionException | InterruptedException e) {
             System.err.println("Error to send register client message: " + e.getMessage());

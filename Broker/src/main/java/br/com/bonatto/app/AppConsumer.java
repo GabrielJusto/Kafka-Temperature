@@ -1,7 +1,6 @@
 package br.com.bonatto.app;
 
 import br.com.bonatto.consumer.KafkaConsumer;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 public class AppConsumer
 {

@@ -3,7 +3,6 @@ package br.com.bonatto.consumer;
 import br.com.bonatto.kafka.KafkaDispatcher;
 import br.com.bonatto.kafka.KafkaService;
 import br.com.bonatto.model.Client;
-import br.com.bonatto.model.Station;
 import br.com.bonatto.model.StationInfo;
 import br.com.bonatto.repository.client.ClientRepository;
 import br.com.bonatto.repository.factory.ConnectionFactory;
@@ -23,6 +22,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -70,11 +70,11 @@ public class KafkaConsumer
 
             switch (record.topic()) {
                 case "CLIENT-REGISTER":
-                    System.out.println("recebi");
                     className = Client.class.getName();
                     Client c = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
                     clientRepository.insert(c);
                     con.commit();
+                    scheduleCharge(con, c);
                     break;
 
                 case "CLIENT-INFO" :
@@ -84,12 +84,13 @@ public class KafkaConsumer
                     con.commit();
                     break;
                 case "STATION-REGISTER":
-                   sendStationInfoRequest(gson, record, stationRepository, con);
+                    sendStationInfoRequest(gson, record, stationRepository, con);
                     break;
                 case "STATION-REGISTER-REQUEST":
                     senStationId();
                     break;
                 case "STATION-INFO":
+                    System.out.println("recebi INFO");
                     className = StationInfo.class.getName();
                     StationInfo stationInfo = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
                     stationRepository.update(stationInfo);
@@ -121,9 +122,30 @@ public class KafkaConsumer
         }
     }
 
+
+
+
+    private void scheduleCharge(Connection con, Client c) throws SQLException {
+        StationRepository stationRepository = new StationRepository(con);
+        ArrayList<StationInfo> stationsList = stationRepository.search();
+
+        br.com.bonatto.model.Point cLocal = c.getLocal();
+        StationInfo closestStation = stationsList.get(0);
+        for(StationInfo s : stationsList)
+            if(br.com.bonatto.model.Point.distance(s.getLocal(), cLocal) < br.com.bonatto.model.Point.distance(closestStation.getLocal(), cLocal)
+                && !s.isBusy())
+                closestStation = s;
+
+
+        closestStation.setBusy(true);
+        stationRepository.update(closestStation);
+
+        con.commit();
+    }
+
     private void senStationId() {
         try(KafkaDispatcher<Long> stationIdDispatcher = new KafkaDispatcher<>()) {
-            stationIdDispatcher.send("STATION-REGISTER-RESPONSE", Station.class.getSimpleName(), System.currentTimeMillis());
+            stationIdDispatcher.send("R-STATION-REGISTER-RESPONSE", StationInfo.class.getSimpleName(), System.currentTimeMillis());
 
         } catch (ExecutionException | InterruptedException | RuntimeException e) {
             throw new RuntimeException(e);
@@ -133,10 +155,10 @@ public class KafkaConsumer
 
     private void sendStationInfoRequest(Gson gson, ConsumerRecord<String, String> record, StationRepository stationRepository, Connection con)
     {
-        try(KafkaDispatcher<Station> infoRequestDispatcher = new KafkaDispatcher<>()) {
+        try {
 
-            String className = Station.class.getName();
-            Station station = gson.fromJson(record.value(), (Class<Station>) Class.forName(className));
+            String className = StationInfo.class.getName();
+            StationInfo station = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
             stationRepository.insert(station);
             con.commit();
 

@@ -1,0 +1,5 @@
+br/com/bonatto/kafka/ConsumerFunction.class
+br/com/bonatto/kafka/GsonSerializer.class
+br/com/bonatto/kafka/GsonDeserializer.class
+br/com/bonatto/kafka/KafkaService.class
+br/com/bonatto/kafka/KafkaDispatcher.class

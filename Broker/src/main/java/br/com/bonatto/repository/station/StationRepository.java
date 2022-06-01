@@ -1,13 +1,14 @@
 package br.com.bonatto.repository.station;
 
 import br.com.bonatto.model.Point;
-import br.com.bonatto.model.Station;
 import br.com.bonatto.model.StationInfo;
 import br.com.bonatto.repository.Point.PointRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class StationRepository
 {
@@ -39,7 +40,7 @@ public class StationRepository
         }
     }
 
-    public void insert(Station station)
+    public void insert(StationInfo station)
     {
 
         PointRepository pointRepository = new PointRepository(con);
@@ -50,12 +51,17 @@ public class StationRepository
         else
             pointId = p.getId();
 
-        String sql = "INSERT INTO station(stationId, pointId, connector, fastCharge, brand) VALUES (?,?,?,?,?)";
+        String sql = "INSERT INTO station( stationId, busy, price, busyTime, timeToCharge, temperature, pointId, connector, fastCharge, brand) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql))
         {
             int i = 1;
             pstmt.setLong(i++, station.getId());
+            pstmt.setBoolean(i++, station.isBusy());
+            pstmt.setDouble(i++, station.getPrice());
+            pstmt.setLong(i++, station.getBusyTime());
+            pstmt.setLong(i++, station.getTimeToCharge());
+            pstmt.setDouble(i++, station.getTemperature());
             pstmt.setInt(i++, pointId);
             pstmt.setString(i++, station.getConnector());
             pstmt.setBoolean(i++, station.isFastCharge());
@@ -68,4 +74,38 @@ public class StationRepository
         }
     }
 
+
+    public ArrayList<StationInfo> search()
+    {
+        String sql = "SELECT busy, price, busyTime, timeToCharge, temperature, stationId, pointId, connector, fastCharge, brand FROM station";
+
+        try(PreparedStatement pstmt = con.prepareStatement(sql))
+        {
+            try(ResultSet rs = pstmt.executeQuery())
+            {
+                PointRepository pointRepository = new PointRepository(con);
+                ArrayList<StationInfo> list = new ArrayList<>();
+                while(rs.next()) {
+                    Point p = pointRepository.select(rs.getInt("pointId"));
+
+                    list.add(new StationInfo(
+                            rs.getLong("stationId"),
+                            rs.getBoolean("busy"),
+                            rs.getDouble("price"),
+                            rs.getLong("busyTime"),
+                            rs.getLong("timeToCharge"),
+                            rs.getDouble("temperature"),
+                            p,
+                            rs.getBoolean("fastCharge"),
+                            rs.getString("brand"),
+                            rs.getString("connector")
+                    ));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -1,0 +1,6 @@
+br/com/bonatto/consumer/KafkaConsumer.class
+br/com/bonatto/repository/client/ClientRepository.class
+br/com/bonatto/repository/Point/PointRepository.class
+br/com/bonatto/app/AppConsumer.class
+br/com/bonatto/repository/factory/ConnectionFactory.class
+br/com/bonatto/repository/station/StationRepository.class

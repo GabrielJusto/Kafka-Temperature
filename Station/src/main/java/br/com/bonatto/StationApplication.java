@@ -2,49 +2,35 @@ package br.com.bonatto;
 
 import br.com.bonatto.kafka.KafkaDispatcher;
 import br.com.bonatto.kafka.KafkaService;
-import br.com.bonatto.model.Client;
 import br.com.bonatto.model.Point;
-import br.com.bonatto.model.Station;
 import br.com.bonatto.model.StationInfo;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.influxdb.client.InfluxDBClient;
-import com.influxdb.client.WriteApi;
-import com.influxdb.client.domain.WritePrecision;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.Instant;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 public class StationApplication
 {
 
     private StationInfo info;
-    private KafkaService registerService;
-    private Station station;
 
     public static void main(String[] args) {
 
         sendRegisterRequest();
 
         StationApplication app = new StationApplication();
-        app.registerService = new KafkaService(StationApplication.class.getSimpleName(),
-                "STATION-REGISTER-RESPONSE",
+        KafkaService registerService = new KafkaService(StationApplication.class.getSimpleName(),
+                Pattern.compile("R-STATION-.*"),
                 app::parseRegister,
-                Long.class,
-                Map.of());
+                String.class,
+                Map.of(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()));
 
 
-        app.registerService.run();
+        registerService.run();
 
 
 
@@ -52,33 +38,39 @@ public class StationApplication
 
     }
 
-    private void parseRegister(ConsumerRecord<String, Long> record, InfluxDBClient client, String bucket, String org)
+    private void parseRegister(ConsumerRecord<String, String> record, InfluxDBClient client, String bucket, String org)
     {
-        Long stationId = record.value();
-        station = new Station(stationId, new Point(20,10), "CON2", false, "B2");
-        try(KafkaDispatcher<Station> stationDispatcher = new KafkaDispatcher<>())
+
+
+            switch (record.topic()) {
+                case "R-STATION-REGISTER-RESPONSE":
+                    Long stationId = Long.valueOf(record.value());
+                    info = new StationInfo(
+                            stationId,
+                            false,
+                            50,
+                            0,
+                            0,
+                            30,
+                            new Point(20, 10),
+                            true,
+                            "B2",
+                            "CON2");
+                    StationInfo info = new StationInfo(stationId, false, 100, 0, 100000, 20);
+                    sendStation();
+                    break;
+            }
+
+
+    }
+
+
+
+    private void sendStation()
+    {
+        try(KafkaDispatcher<StationInfo> stationDispatcher = new KafkaDispatcher<>())
         {
-
-
-            stationDispatcher.send("STATION-REGISTER", Station.class.getSimpleName(), station);
-            registerService.close();
-//            StationInfo info = new StationInfo(stationId, false, 100, 0, 100000, 20);
-//
-//
-//
-//            StationApplication stationApp = new StationApplication();
-//            stationApp.info = info;
-//            KafkaService service = new KafkaService(
-//                    StationApplication.class.getSimpleName(),
-//                    "STATION-UPDATE-REQUEST",
-//                    stationApp::parse,
-//                    String.class,
-//                    Map.of(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()));
-//
-//            service.run();
-//
-//            service.close();
-
+            stationDispatcher.send("STATION-REGISTER", Station.class.getSimpleName(), info);
         }
         catch (ExecutionException e) {
             throw new RuntimeException(e);
@@ -98,7 +90,6 @@ public class StationApplication
 
 
     private void parse(ConsumerRecord<String, String> record, InfluxDBClient client, String bucket, String org) {
-
 
 
         try(KafkaDispatcher<StationInfo> infoDispatcher = new KafkaDispatcher<>()) {
