@@ -108,4 +108,19 @@ public class StationRepository
             throw new RuntimeException(e);
         }
     }
+
+    public void free(long stationId)
+    {
+        String sql = "UPDATE station SET busy = 0 WHERE stationId = ?";
+
+        try(PreparedStatement pstmt = con.prepareStatement(sql))
+        {
+            pstmt.setLong(1, stationId);
+
+            pstmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }

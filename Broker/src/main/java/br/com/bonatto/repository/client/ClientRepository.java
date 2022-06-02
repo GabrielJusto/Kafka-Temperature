@@ -60,7 +60,7 @@ public class ClientRepository {
 
         int pointId = getPointId(client);
 
-        String sql = "INSERT INTO client ( clientId, pointId, connector, maxPrice, walletKey, timeToCharge. charging) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO client ( clientId, pointId, connector, maxPrice, walletKey, timeToCharge, charging) VALUES (?,?,?,?,?,?,?)";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql))
         {
@@ -82,7 +82,7 @@ public class ClientRepository {
 
     public Client getById(long id)
     {
-        String sql = "SELECT clientId, pointId, connector, maxPrice, walletKey, timeToCharge. charging FROM client WHERE clientId = ? ";
+        String sql = "SELECT clientId, pointId, connector, maxPrice, walletKey, timeToCharge, charging FROM client WHERE clientId = ? ";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql))
         {

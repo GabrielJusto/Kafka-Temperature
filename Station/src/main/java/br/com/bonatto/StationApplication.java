@@ -41,7 +41,8 @@ public class StationApplication
     private void parseRegister(ConsumerRecord<String, String> record, InfluxDBClient client, String bucket, String org)
     {
 
-
+            //lat -29.97148 - -30.24828
+            //lon -51.24001 - -51.11504
             switch (record.topic()) {
                 case "R-STATION-REGISTER-RESPONSE":
                     Long stationId = Long.valueOf(record.value());
