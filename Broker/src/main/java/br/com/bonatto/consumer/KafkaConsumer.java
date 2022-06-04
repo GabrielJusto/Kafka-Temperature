@@ -33,9 +33,10 @@ public class KafkaConsumer
 
 
     /*Mapeia o id do cliente para o id da estacao que ele esta carregando*/
-    private HashMap<Long, Long> chargingMap = new HashMap<>();;
+    private HashMap<Long, Long> chargingMap = new HashMap<>();
+    private Connection con;
 
-    public void consume() {
+    public void consume() throws SQLException {
 
         String token = "vZX0TP_Th17nFbJJdcieHF8uC1mjA3vyQwSIMqYPHIJ647VNu37ZL3OXUgC-iZvoPcKCTGN0cfKeteUlRWk_BA==";
         String bucket = "Bonatto";
@@ -44,8 +45,11 @@ public class KafkaConsumer
 
 
         InfluxDBClient client = InfluxDBClientFactory.create("http://localhost:8086", token.toCharArray());
+        ConnectionFactory factory = new ConnectionFactory();
 
-       KafkaConsumer consumer = new KafkaConsumer();
+
+        KafkaConsumer consumer = new KafkaConsumer();
+        consumer.con = factory.recuperarConexao();
         KafkaService service = new KafkaService(KafkaConsumer.class.getSimpleName(),
                 Pattern.compile(".*"),
                 consumer::parse,
@@ -57,6 +61,7 @@ public class KafkaConsumer
         service.run();
 
         service.close();
+        con.close();
     }
 
 
@@ -67,41 +72,33 @@ public class KafkaConsumer
 
             Gson gson = new GsonBuilder().create();
             String className;
-            ConnectionFactory factory = new ConnectionFactory();
-            Connection con = factory.recuperarConexao();
-            con.setAutoCommit(false);
+
+
 
             StationRepository stationRepository = new StationRepository(con);
-            ClientRepository clientRepository = new ClientRepository(con);
 
             switch (record.topic()) {
                 case "CLIENT-CHARGED":
                     freeStation(record.value(), con);
                     break;
                 case "CLIENT-REGISTER":
-                    className = Client.class.getName();
-                    Client c = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
-                    clientRepository.insert(c);
-                    con.commit();
+                    Thread t1 = new Thread(new ClientRegister(record, con));
+                    t1.start();
                     break;
 
                 case "CLIENT-INFO" :
-                    className = Client.class.getName();
-                    Client clientInfo = gson.fromJson(record.value(), (Class<Client>) Class.forName(className));
+                   Thread t2 = new Thread(new ScheduleCharge(record, chargingMap, con));
+                   t2.start();
 
-                    scheduleCharge(con, clientInfo);
                     break;
                 case "STATION-REGISTER":
                     sendStationInfoRequest(gson, record, stationRepository, con);
-                    break;
-                case "STATION-REGISTER-REQUEST":
-                    senStationId();
                     break;
                 case "STATION-INFO":
                     className = StationInfo.class.getName();
                     StationInfo stationInfo = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
                     stationRepository.update(stationInfo);
-                    con.commit();
+
 
                     Point point = Point
                             .measurement("StationPrice")
@@ -121,105 +118,25 @@ public class KafkaConsumer
                     }
 
             }
-
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
 
-
-
-    private void scheduleCharge(Connection con, Client c) throws SQLException {
-
-
-        boolean scheduled = false;
-
-        //Inicializa os repositorios para alterar o status da estacao e do cliente se for encontrada uma estacao
-        StationRepository stationRepository = new StationRepository(con);
-        ClientRepository clientRepository = new ClientRepository(con);
-
-        //Verivica se o cliente ja esta carregando
-        Client c1 = clientRepository.getById(c.getId());
-        if(c1.isCharging())
-            return;
-
-        ArrayList<StationInfo> stationsList = stationRepository.search();
-
-        br.com.bonatto.model.Point cLocal = c.getLocal();
-        StationInfo closestStation = null;
-
-        for(int i=0; i<stationsList.size(); i++) {
-            StationInfo s = stationsList.get(i);
-
-            //Encontra a primeira estacao compativel
-            if(closestStation == null) {
-                if (!s.isBusy() && s.getConnector().equals(c1.getConnector()))
-                    closestStation = s;
-            }else {
-                s = stationsList.get(i);
-                if(!s.isBusy() && s.getConnector().equals(c1.getConnector())
-                        && br.com.bonatto.model.Point.distance(s.getLocal(), c1.getLocal()) < br.com.bonatto.model.Point.distance(closestStation.getLocal(), c.getLocal()))
-                    closestStation = s;
-
-            }
-
-        }
-
-        if(closestStation != null) {
-            closestStation.setBusy(true);
-            stationRepository.update(closestStation);
-
-            c1.setCharging(true);
-            clientRepository.update(c1);
-
-            scheduled = true;
-
-            chargingMap.put(c1.getId(), closestStation.getId());
-        }
-        sendClientCharging(c1, scheduled);
-
-        con.commit();
-    }
 
 
 
     private void freeStation(String clientIdStr, Connection con)
     {
-        try {
-            long clientId = Long.parseLong(clientIdStr);
-            long stationId = chargingMap.get(clientId);
+        long clientId = Long.parseLong(clientIdStr);
+        long stationId = chargingMap.get(clientId);
 
-            System.out.println("free station: " + stationId);
-            StationRepository stationRepository = new StationRepository(con);
-            stationRepository.free(stationId);
+        System.out.println("free station: " + stationId);
+        StationRepository stationRepository = new StationRepository(con);
+        stationRepository.free(stationId);
 
-
-            con.commit();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void sendClientCharging(Client c, boolean scheduled)
-    {
-        try(KafkaDispatcher<Boolean> chargingDispatcher = new KafkaDispatcher<>()) {
-            chargingDispatcher.send("R-CLIENT-CHARGING-"+String.valueOf(c.getId()), Boolean.class.getSimpleName(), scheduled);
-
-        } catch (ExecutionException | InterruptedException | RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void senStationId() {
-        try(KafkaDispatcher<Long> stationIdDispatcher = new KafkaDispatcher<>()) {
-            stationIdDispatcher.send("R-STATION-REGISTER-RESPONSE", StationInfo.class.getSimpleName(), System.currentTimeMillis());
-
-        } catch (ExecutionException | InterruptedException | RuntimeException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -230,9 +147,9 @@ public class KafkaConsumer
             String className = StationInfo.class.getName();
             StationInfo station = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
             stationRepository.insert(station);
-            con.commit();
 
-        } catch ( SQLException | RuntimeException | ClassNotFoundException e) {
+
+        } catch ( RuntimeException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

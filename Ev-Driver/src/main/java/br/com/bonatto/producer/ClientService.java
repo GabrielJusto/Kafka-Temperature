@@ -21,30 +21,36 @@ public class ClientService
 
     private Client client;
 
+
+    public ClientService(long id, double lon, double lat, String connector, double maxPrice, String walletKey, long timeToCharge)
+    {
+        client = new Client(id, new Point(lon,lat) , connector, maxPrice, walletKey, timeToCharge, false);
+
+    }
+
     public void run()
     {
         try(KafkaDispatcher<Client> clientDispatcher = new KafkaDispatcher<>())
         {
-            ClientService service = new ClientService();
 
 
 
-            int uniqueID = (int) (System.currentTimeMillis()%999999);
-            service.client = new Client(uniqueID, new Point(-30.0277,-51.2287) , "CON2", 50, "WALLET123", 15000, false);
-            clientDispatcher.send("CLIENT-REGISTER", Client.class.getSimpleName(), service.client);
+            createTopic("R-CLIENT-CHARGING-" + client.getId(), 1, 1, Map.of());
 
-            createTopic("R-CLIENT-CHARGING-" + uniqueID, 1, 1, Map.of());
+            clientDispatcher.send("CLIENT-REGISTER", Client.class.getSimpleName(), client);
+
+
 
 
             KafkaService chargingService = new KafkaService(ClientApplication.class.getSimpleName(),
-                    "R-CLIENT-CHARGING-" + service.client.getId(),
-                    service::parse,
+                    "R-CLIENT-CHARGING-" + client.getId(),
+                    this::parse,
                     Boolean.class,
                     Map.of());
 
 
             Thread.sleep(5000);
-            clientDispatcher.send("CLIENT-INFO", Client.class.getSimpleName(), service.client);
+            clientDispatcher.send("CLIENT-INFO", Client.class.getSimpleName(), client);
 
 
 
@@ -76,6 +82,7 @@ public class ClientService
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
+                Thread.currentThread().interrupt();
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
