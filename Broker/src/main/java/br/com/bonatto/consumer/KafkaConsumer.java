@@ -48,6 +48,9 @@ public class KafkaConsumer
         ConnectionFactory factory = new ConnectionFactory();
 
 
+        Thread threadMonitor = new Thread(new Monitor());
+        threadMonitor.start();
+
         KafkaConsumer consumer = new KafkaConsumer();
         consumer.con = factory.recuperarConexao();
         KafkaService service = new KafkaService(KafkaConsumer.class.getSimpleName(),
@@ -67,61 +70,38 @@ public class KafkaConsumer
 
     private void parse(ConsumerRecord<String, String> record, InfluxDBClient client, String bucket, String org) {
 
-        try {
-
-
-            Gson gson = new GsonBuilder().create();
-            String className;
 
 
 
-            StationRepository stationRepository = new StationRepository(con);
-
-            switch (record.topic()) {
-                case "CLIENT-CHARGED":
-                    freeStation(record.value(), con);
-                    break;
-                case "CLIENT-REGISTER":
-                    Thread t1 = new Thread(new ClientRegister(record, con));
-                    t1.start();
-                    break;
-
-                case "CLIENT-INFO" :
-                   Thread t2 = new Thread(new ScheduleCharge(record, chargingMap, con));
-                   t2.start();
-
-                    break;
-                case "STATION-REGISTER":
-                    sendStationInfoRequest(gson, record, stationRepository, con);
-                    break;
-                case "STATION-INFO":
-                    className = StationInfo.class.getName();
-                    StationInfo stationInfo = gson.fromJson(record.value(), (Class<StationInfo>) Class.forName(className));
-                    stationRepository.update(stationInfo);
+        Gson gson = new GsonBuilder().create();
 
 
-                    Point point = Point
-                            .measurement("StationPrice")
-                            .addTag("host", "host1")
-                            .addField("used_percent", stationInfo.getPrice())
-                            .time(Instant.now(), WritePrecision.NS);
-                    Point p2 = Point
-                            .measurement("StationBusy")
-                            .addTag("host", "host1")
-                            .addField("used_percent", stationInfo.isBusy())
-                            .time(Instant.now(), WritePrecision.NS);
 
 
-                    try (WriteApi writeApi = client.getWriteApi()) {
-                        writeApi.writePoint(bucket, org, point);
-                        writeApi.writePoint(bucket, org, p2);
-                    }
+        StationRepository stationRepository = new StationRepository(con);
 
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        switch (record.topic()) {
+            case "CLIENT-CHARGED":
+                freeStation(record.value(), con);
+                break;
+            case "CLIENT-REGISTER":
+                Thread t1 = new Thread(new ClientRegister(record, con));
+                t1.start();
+                break;
+
+            case "CLIENT-INFO" :
+               Thread t2 = new Thread(new ScheduleCharge(record, chargingMap, con));
+               t2.start();
+
+                break;
+            case "STATION-REGISTER":
+                sendStationInfoRequest(gson, record, stationRepository, con);
+                break;
+            case "STATION-INFO":
+
+
         }
+
     }
 
 

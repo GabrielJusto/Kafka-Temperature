@@ -13,7 +13,7 @@ public class ClientApplication
 
         Random r = new Random();
 
-        for(int i = 0; i<30; i++)
+        for(int i = 0; i<1; i++)
         {
             //lat -29.97148 - -30.24828
             //lon -51.24001 - -51.11504
