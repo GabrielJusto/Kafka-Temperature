@@ -49,9 +49,17 @@ public class Monitor implements Runnable{
                 if (stationList.size() != 0)
                     occupation = ((double)busy / stationList.size())*100;
 
-                for(String c : listConnectors)
+                for(int i=0; i<listConnectors.size(); i++)
                 {
-                    
+                    Point p = Point
+                            .measurement("Occupation_CON_"+i)
+                            .addTag("conn", i+"")
+                            .addField("used_percent", occupation)
+                            .time(Instant.now(), WritePrecision.NS);
+
+                    try (WriteApi writeApi = client.getWriteApi()) {
+                        writeApi.writePoint(bucket, org, p);
+                    }
                 }
 
                 Point point = Point
